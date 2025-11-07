@@ -1,0 +1,70 @@
+{
+  "app": {
+    "title": "Классный помощник",
+    "logout": "Выйти",
+    "searchPlaceholder": "Поиск ученика...",
+    "session": "Сессия очистится через {{time}}"
+  },
+  "login": {
+    "title": "Вход",
+    "subtitle": "Используйте корпоративную почту",
+    "email": "Email",
+    "password": "Пароль",
+    "showPassword": "Показать пароль",
+    "submit": "Войти",
+    "errors": {
+      "required": "Обязательное поле",
+      "email": "Некорректный email"
+    }
+  },
+  "dashboard": {
+    "welcome": "Добро пожаловать, {{email}}",
+    "quickActions": "Быстрые действия",
+    "upload": "Загрузить XLSX",
+    "students": "Перейти к ученикам"
+  },
+  "upload": {
+    "title": "Загрузка списка учеников",
+    "dropzone": "Перетащите файл XLSX или нажмите для выбора",
+    "selectFile": "Выбрать файл",
+    "preview": "Предпросмотр",
+    "clear": "Очистить сессию",
+    "goStudents": "Перейти к списку учеников",
+    "errors": "Ошибки",
+    "warnings": "Предупреждения"
+  },
+  "students": {
+    "title": "Ученики",
+    "empty": "Нет учеников. Загрузите файл на вкладке Загрузка.",
+    "search": "Поиск по ФИО",
+    "export": "Экспорт в CSV"
+  },
+  "reports": {
+    "title": "Отчёты",
+    "current": "Текущая успеваемость",
+    "risks": "Академические риски",
+    "exportPdf": "PDF",
+    "exportXlsx": "XLSX"
+  },
+  "labels": {
+    "title": "Этикетки",
+    "downloadPdf": "Скачать PDF",
+    "preview": "Предпросмотр"
+  },
+  "settings": {
+    "title": "Настройки",
+    "theme": "Тема",
+    "language": "Язык",
+    "dateFormat": "Формат даты",
+    "session": "Сессия",
+    "expires": "Автоочистка через"
+  },
+  "nav": {
+    "dashboard": "Панель",
+    "upload": "Загрузка",
+    "students": "Ученики",
+    "reports": "Отчёты",
+    "labels": "Этикетки",
+    "settings": "Настройки"
+  }
+}
