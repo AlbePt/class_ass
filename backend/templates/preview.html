@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %} — Предпросмотр{% endblock %}
+{% block content %}
+<div class="bg-white rounded-lg shadow p-6">
+    <h1 class="text-xl font-semibold mb-4">Предпросмотр отчёта</h1>
+    <div class="flex space-x-2 mb-4">
+        <a id="downloadPdf" class="bg-green-600 text-white px-4 py-2 rounded" href="#">Скачать PDF</a>
+        <a id="downloadXlsx" class="bg-blue-600 text-white px-4 py-2 rounded" href="#">Скачать Excel</a>
+        <button id="discardSession" class="bg-gray-200 px-4 py-2 rounded">Очистить</button>
+    </div>
+    <div id="warnings" class="mb-4"></div>
+    <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+            <thead>
+                <tr class="bg-gray-100 text-left">
+                    <th class="px-3 py-2">Ученик</th>
+                    <th class="px-3 py-2">Класс</th>
+                    <th class="px-3 py-2">Предметов</th>
+                    <th class="px-3 py-2">Средний балл</th>
+                    <th class="px-3 py-2">Слабые предметы</th>
+                </tr>
+            </thead>
+            <tbody id="studentsBody"></tbody>
+        </table>
+    </div>
+</div>
+<script>
+    const session = '{{ session }}';
+    const pdfLink = document.getElementById('downloadPdf');
+    const xlsxLink = document.getElementById('downloadXlsx');
+    const warnings = document.getElementById('warnings');
+    const studentsBody = document.getElementById('studentsBody');
+    const discardSession = document.getElementById('discardSession');
+
+    pdfLink.href = `/reports/current/export/pdf?session=${session}`;
+    xlsxLink.href = `/reports/current/export/xlsx?session=${session}`;
+
+    async function loadPreview() {
+        const response = await fetch(`/reports/current/preview?session=${session}`);
+        if (!response.ok) {
+            warnings.textContent = 'Сессия не найдена, загрузите файл повторно.';
+            return;
+        }
+        const data = await response.json();
+        const warningList = [...(data.warnings || [])];
+        if (warningList.length) {
+            warnings.innerHTML = '<div class="bg-yellow-100 border border-yellow-300 text-yellow-900 px-3 py-2 rounded mb-4">' +
+                '<p class="font-semibold mb-1">Предупреждения:</p>' +
+                '<ul class="list-disc list-inside text-sm">' +
+                warningList.map(w => `<li>${w}</li>`).join('') +
+                '</ul></div>';
+        }
+        studentsBody.innerHTML = (data.students || []).map(student => {
+            const weak = student.has_weak_subjects ? (student.weak_subjects || []).join(', ') : '—';
+            const avg = student.average_score !== null ? student.average_score.toFixed(1) : '—';
+            return `<tr class="border-b">` +
+                `<td class="px-3 py-2">${student.fio}</td>` +
+                `<td class="px-3 py-2">${student.klass || '—'}</td>` +
+                `<td class="px-3 py-2">${student.subject_count}</td>` +
+                `<td class="px-3 py-2">${avg}</td>` +
+                `<td class="px-3 py-2">${weak}</td>` +
+                `</tr>`;
+        }).join('');
+    }
+
+    discardSession.addEventListener('click', async () => {
+        await fetch(`/reports/current/discard?session=${session}`, {
+            method: 'POST'
+        });
+        window.location.href = '/reports/current/ui';
+    });
+
+    loadPreview();
+</script>
+{% endblock %}

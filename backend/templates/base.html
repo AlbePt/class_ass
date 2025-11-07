@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_name }}{% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-white border-b border-gray-200">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="text-lg font-semibold">{{ app_name }}</a>
+            <div class="text-sm text-gray-600">
+                {% if user %}
+                    {{ user.email }}
+                {% else %}
+                    <a href="#login" onclick="document.getElementById('loginModal').classList.remove('hidden')" class="text-blue-600">Войти</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    <main class="max-w-5xl mx-auto px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    <div id="loginModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h2 class="text-lg font-semibold mb-4">Вход</h2>
+            <form id="loginForm" class="space-y-4">
+                <input type="email" name="username" placeholder="Email" class="w-full border rounded px-3 py-2" required>
+                <input type="password" name="password" placeholder="Пароль" class="w-full border rounded px-3 py-2" required>
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded">Войти</button>
+                <p class="text-sm text-gray-500">Нет аккаунта? <a href="#" id="showRegister" class="text-blue-600">Создать</a></p>
+            </form>
+            <form id="registerForm" class="space-y-4 hidden">
+                <input type="email" name="email" placeholder="Email" class="w-full border rounded px-3 py-2" required>
+                <input type="password" name="password" placeholder="Пароль" class="w-full border rounded px-3 py-2" required>
+                <button type="submit" class="w-full bg-green-600 text-white py-2 rounded">Регистрация</button>
+                <p class="text-sm text-gray-500">Уже есть аккаунт? <a href="#" id="showLogin" class="text-blue-600">Войти</a></p>
+            </form>
+            <button class="mt-4 text-sm text-gray-500" onclick="document.getElementById('loginModal').classList.add('hidden')">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        document.getElementById('showRegister').addEventListener('click', (e) => {
+            e.preventDefault();
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+        });
+        document.getElementById('showLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        });
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(loginForm);
+            const response = await fetch('/auth/login', {
+                method: 'POST',
+                body: formData
+            });
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Не удалось войти');
+            }
+        });
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                email: registerForm.email.value,
+                password: registerForm.password.value
+            };
+            const response = await fetch('/auth/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            if (response.ok) {
+                alert('Регистрация выполнена, войдите');
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            } else {
+                const data = await response.json();
+                alert(data.detail || 'Ошибка регистрации');
+            }
+        });
+    </script>
+</body>
+</html>
