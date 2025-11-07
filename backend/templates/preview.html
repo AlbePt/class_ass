@@ -1,69 +1,214 @@
 {% extends "base.html" %}
 {% block title %} — Предпросмотр{% endblock %}
 {% block content %}
-<div class="bg-white rounded-lg shadow p-6">
-    <h1 class="text-xl font-semibold mb-4">Предпросмотр отчёта</h1>
-    <div class="flex space-x-2 mb-4">
-        <a id="downloadPdf" class="bg-green-600 text-white px-4 py-2 rounded" href="#">Скачать PDF</a>
-        <a id="downloadXlsx" class="bg-blue-600 text-white px-4 py-2 rounded" href="#">Скачать Excel</a>
-        <button id="discardSession" class="bg-gray-200 px-4 py-2 rounded">Очистить</button>
-    </div>
-    <div id="warnings" class="mb-4"></div>
-    <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-            <thead>
-                <tr class="bg-gray-100 text-left">
-                    <th class="px-3 py-2">Ученик</th>
-                    <th class="px-3 py-2">Класс</th>
-                    <th class="px-3 py-2">Предметов</th>
-                    <th class="px-3 py-2">Средний балл</th>
-                    <th class="px-3 py-2">Слабые предметы</th>
-                </tr>
-            </thead>
-            <tbody id="studentsBody"></tbody>
-        </table>
-    </div>
+<div class="space-y-8">
+    <section class="rounded-3xl bg-white/90 p-8 shadow-xl shadow-indigo-100 ring-1 ring-indigo-100">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div class="space-y-3">
+                <span class="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-600">
+                    <span class="h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                    Предпросмотр отчёта
+                </span>
+                <h1 class="text-3xl font-semibold text-slate-900">Проверьте данные перед экспортом</h1>
+                <p class="max-w-2xl text-sm text-slate-500">Мы собрали ключевые показатели по каждому ученику. Используйте фильтры ниже, чтобы сосредоточиться на группе риска, а затем экспортируйте отчёт в печатном или электронном виде.</p>
+            </div>
+            <div class="flex flex-wrap gap-3">
+                <a id="downloadPdf" class="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-200 transition hover:bg-emerald-600" href="#">
+                    📄 PDF
+                </a>
+                <a id="downloadXlsx" class="inline-flex items-center gap-2 rounded-full bg-indigo-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700" href="#">
+                    📊 Excel
+                </a>
+                <button id="discardSession" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-rose-200 hover:text-rose-600">
+                    Очистить сессию
+                </button>
+            </div>
+        </div>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" id="summaryCards">
+            <div class="summary-card">
+                <p class="summary-label">Ученики</p>
+                <p id="summaryTotal" class="summary-value">—</p>
+            </div>
+            <div class="summary-card">
+                <p class="summary-label">Средний балл по выборке</p>
+                <p id="summaryAverage" class="summary-value">—</p>
+            </div>
+            <div class="summary-card">
+                <p class="summary-label">Есть слабые предметы</p>
+                <p id="summaryWeak" class="summary-value">—</p>
+            </div>
+            <div class="summary-card">
+                <p class="summary-label">Предупреждения</p>
+                <p id="summaryWarnings" class="summary-value">—</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="rounded-3xl bg-white p-8 shadow-xl shadow-slate-200 ring-1 ring-slate-200/60">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div class="flex flex-wrap gap-3 text-sm text-slate-500">
+                <label class="relative flex items-center">
+                    <span class="sr-only">Поиск по ученикам</span>
+                    <span class="pointer-events-none absolute left-4 text-slate-400">🔍</span>
+                    <input id="studentSearch" type="search" placeholder="Поиск по фамилии или классу" class="w-72 rounded-full border border-slate-200 bg-slate-50 px-10 py-2 text-sm text-slate-700 shadow-inner focus:border-indigo-300 focus:outline-none focus:ring" autocomplete="off">
+                </label>
+                <label class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <input id="weakFilter" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                    Только со слабыми предметами
+                </label>
+            </div>
+            <p id="lastUpdated" class="text-xs uppercase tracking-wide text-slate-400"></p>
+        </div>
+        <div id="warnings" class="mt-6"></div>
+        <div id="previewLoader" class="mt-6 flex items-center gap-3 rounded-2xl bg-indigo-50 px-4 py-3 text-sm text-indigo-600">
+            <span class="inline-flex h-2 w-2 animate-ping rounded-full bg-indigo-400"></span>
+            Загружаем данные предпросмотра…
+        </div>
+        <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <tr>
+                            <th class="px-4 py-3">Ученик</th>
+                            <th class="px-4 py-3">Класс</th>
+                            <th class="px-4 py-3">Предметов</th>
+                            <th class="px-4 py-3">Средний балл</th>
+                            <th class="px-4 py-3">Слабые предметы</th>
+                            <th class="px-4 py-3">Служебные пометки</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsBody" class="divide-y divide-slate-200 bg-white"></tbody>
+                </table>
+            </div>
+        </div>
+        <div id="emptyState" class="mt-6 hidden rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-6 py-8 text-center text-sm text-slate-500">
+            Данные не найдены. Попробуйте изменить фильтр или загрузить новую выгрузку.
+        </div>
+    </section>
 </div>
 <script>
     const session = '{{ session }}';
     const pdfLink = document.getElementById('downloadPdf');
     const xlsxLink = document.getElementById('downloadXlsx');
-    const warnings = document.getElementById('warnings');
+    const warningsEl = document.getElementById('warnings');
     const studentsBody = document.getElementById('studentsBody');
     const discardSession = document.getElementById('discardSession');
+    const studentSearch = document.getElementById('studentSearch');
+    const weakFilter = document.getElementById('weakFilter');
+    const summaryTotal = document.getElementById('summaryTotal');
+    const summaryAverage = document.getElementById('summaryAverage');
+    const summaryWeak = document.getElementById('summaryWeak');
+    const summaryWarnings = document.getElementById('summaryWarnings');
+    const loader = document.getElementById('previewLoader');
+    const emptyState = document.getElementById('emptyState');
+    const lastUpdated = document.getElementById('lastUpdated');
 
     pdfLink.href = `/reports/current/export/pdf?session=${session}`;
     xlsxLink.href = `/reports/current/export/xlsx?session=${session}`;
 
-    async function loadPreview() {
-        const response = await fetch(`/reports/current/preview?session=${session}`);
-        if (!response.ok) {
-            warnings.textContent = 'Сессия не найдена, загрузите файл повторно.';
+    let students = [];
+
+    function renderWarnings(dataWarnings = [], studentWarnings = []) {
+        const allWarnings = [...dataWarnings, ...studentWarnings];
+        if (!allWarnings.length) {
+            warningsEl.innerHTML = '';
             return;
         }
-        const data = await response.json();
-        const warningList = [...(data.warnings || [])];
-        if (warningList.length) {
-            warnings.innerHTML = '<div class="bg-yellow-100 border border-yellow-300 text-yellow-900 px-3 py-2 rounded mb-4">' +
-                '<p class="font-semibold mb-1">Предупреждения:</p>' +
-                '<ul class="list-disc list-inside text-sm">' +
-                warningList.map(w => `<li>${w}</li>`).join('') +
-                '</ul></div>';
+        warningsEl.innerHTML = `
+            <div class="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800 shadow-sm">
+                <p class="font-semibold">Обратите внимание:</p>
+                <ul class="mt-2 list-disc space-y-1 pl-5">
+                    ${allWarnings.map((w) => `<li>${w}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+    }
+
+    function renderStudents(list) {
+        if (!list.length) {
+            studentsBody.innerHTML = '';
+            emptyState.classList.remove('hidden');
+            return;
         }
-        studentsBody.innerHTML = (data.students || []).map(student => {
-            const weak = student.has_weak_subjects ? (student.weak_subjects || []).join(', ') : '—';
-            const avg = student.average_score !== null ? student.average_score.toFixed(1) : '—';
-            return `<tr class="border-b">` +
-                `<td class="px-3 py-2">${student.fio}</td>` +
-                `<td class="px-3 py-2">${student.klass || '—'}</td>` +
-                `<td class="px-3 py-2">${student.subject_count}</td>` +
-                `<td class="px-3 py-2">${avg}</td>` +
-                `<td class="px-3 py-2">${weak}</td>` +
-                `</tr>`;
+        emptyState.classList.add('hidden');
+        studentsBody.innerHTML = list.map((student, index) => {
+            const weak = student.has_weak_subjects && student.weak_subjects.length
+                ? student.weak_subjects.map((subject) => `<span class="weak-pill">${subject}</span>`).join(' ')
+                : '<span class="text-slate-400">Нет слабых предметов</span>';
+            const warningsMarkup = student.warnings.length
+                ? student.warnings.map((warning) => `<span class="warning-pill">${warning}</span>`).join(' ')
+                : '<span class="text-slate-400">—</span>';
+            const average = student.average_score !== null ? student.average_score.toFixed(1) : '—';
+            const zebra = index % 2 === 1 ? 'bg-slate-50/60' : '';
+            return `
+                <tr class="${zebra}">
+                    <td class="px-4 py-3 text-slate-700">${student.fio}</td>
+                    <td class="px-4 py-3 text-slate-500">${student.klass || '—'}</td>
+                    <td class="px-4 py-3 text-slate-500">${student.subject_count}</td>
+                    <td class="px-4 py-3 font-semibold text-slate-700">${average}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex flex-wrap gap-2">${weak}</div>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex flex-wrap gap-2">${warningsMarkup}</div>
+                    </td>
+                </tr>
+            `;
         }).join('');
     }
 
+    function updateSummary(data) {
+        const total = data.students.length;
+        const weakCount = data.students.filter((student) => student.has_weak_subjects).length;
+        const averages = data.students.map((student) => student.average_score).filter((value) => value !== null && !Number.isNaN(value));
+        const avgValue = averages.length ? (averages.reduce((acc, value) => acc + value, 0) / averages.length).toFixed(1) : '—';
+        const warningsTotal = (data.warnings || []).length + data.students.reduce((acc, student) => acc + (student.warnings || []).length, 0);
+
+        summaryTotal.textContent = total || '—';
+        summaryAverage.textContent = avgValue;
+        summaryWeak.textContent = weakCount || '—';
+        summaryWarnings.textContent = warningsTotal || '—';
+        lastUpdated.textContent = `Сессия ${session.slice(0, 8)} • Обновлено ${new Date().toLocaleString('ru-RU')}`;
+    }
+
+    function applyFilters() {
+        const query = studentSearch.value.trim().toLowerCase();
+        const onlyWeak = weakFilter.checked;
+        const filtered = students.filter((student) => {
+            const matchesQuery = !query || student.fio.toLowerCase().includes(query) || (student.klass || '').toLowerCase().includes(query);
+            const matchesWeak = !onlyWeak || student.has_weak_subjects;
+            return matchesQuery && matchesWeak;
+        });
+        renderStudents(filtered);
+    }
+
+    async function loadPreview() {
+        try {
+            const response = await fetch(`/reports/current/preview?session=${session}`);
+            loader.classList.add('hidden');
+            if (!response.ok) {
+                warningsEl.innerHTML = '<div class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">Сессия не найдена, загрузите файл повторно.</div>';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            const data = await response.json();
+            students = data.students || [];
+            renderWarnings(data.warnings || []);
+            renderStudents(students);
+            updateSummary(data);
+        } catch (error) {
+            loader.classList.add('hidden');
+            warningsEl.innerHTML = '<div class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">Не удалось загрузить предпросмотр. Проверьте соединение.</div>';
+        }
+    }
+
+    studentSearch.addEventListener('input', applyFilters);
+    weakFilter.addEventListener('change', applyFilters);
+
     discardSession.addEventListener('click', async () => {
+        if (!confirm('Очистить текущую сессию и вернуться к загрузке файла?')) {
+            return;
+        }
         await fetch(`/reports/current/discard?session=${session}`, {
             method: 'POST'
         });

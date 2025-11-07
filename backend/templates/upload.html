@@ -1,67 +1,198 @@
 {% extends "base.html" %}
 {% block title %} — Текущая успеваемость{% endblock %}
 {% block content %}
-<div class="bg-white rounded-lg shadow p-6">
-    <h1 class="text-xl font-semibold mb-4">Отчёт «Текущая успеваемость»</h1>
-    <form id="uploadForm" class="space-y-4" enctype="multipart/form-data">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label class="block">
-                <span class="text-sm text-gray-600">Период с</span>
-                <input type="date" name="date_from" required class="mt-1 w-full border rounded px-3 py-2">
-            </label>
-            <label class="block">
-                <span class="text-sm text-gray-600">по</span>
-                <input type="date" name="date_to" required class="mt-1 w-full border rounded px-3 py-2">
-            </label>
+<div class="space-y-10">
+    <section class="rounded-3xl bg-white/80 p-8 shadow-xl shadow-indigo-100 ring-1 ring-indigo-100">
+        <div class="flex flex-col gap-8 md:flex-row md:items-center">
+            <div class="flex-1 space-y-4">
+                <span class="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-600">Новый отчёт</span>
+                <h1 class="text-3xl font-semibold text-slate-900 md:text-4xl">Создайте визуальный отчёт об успеваемости за минуты</h1>
+                <p class="text-base leading-relaxed text-slate-600">Загрузите выгрузку из электронного журнала, настройте фильтры и получите готовые этикетки для классного журнала и родительских встреч. Сервис поддерживает динамический предпросмотр и экспорт в PDF или Excel.</p>
+                <ul class="grid gap-3 text-sm text-slate-600 md:grid-cols-2">
+                    <li class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-emerald-400"></span> Актуальные данные по каждому ученику</li>
+                    <li class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-sky-400"></span> Контроль слабых предметов</li>
+                    <li class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-violet-400"></span> Готовый дизайн для печати</li>
+                    <li class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-amber-400"></span> Экспорт без искажений</li>
+                </ul>
+            </div>
+            <div class="flex-1">
+                <div class="rounded-2xl border border-indigo-100 bg-white p-6 shadow-lg shadow-indigo-100">
+                    <div class="space-y-3 text-sm text-slate-500">
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-200">1</div>
+                            <div>
+                                <p class="font-semibold text-slate-900">Выберите период</p>
+                                <p>Определите диапазон успеваемости для анализа.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-500 text-white shadow-lg shadow-sky-200">2</div>
+                            <div>
+                                <p class="font-semibold text-slate-900">Загрузите файл XLSX</p>
+                                <p>Используйте данные из школьной информационной системы.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-200">3</div>
+                            <div>
+                                <p class="font-semibold text-slate-900">Настройте отображение</p>
+                                <p>Выберите слабые предметы и порядок сортировки.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500 text-white shadow-lg shadow-amber-200">4</div>
+                            <div>
+                                <p class="font-semibold text-slate-900">Получите предпросмотр</p>
+                                <p>Экспортируйте итоговые материалы в удобном формате.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <label class="block">
-            <span class="text-sm text-gray-600">Файл XLSX</span>
-            <input type="file" name="file" accept=".xlsx" required class="mt-1 w-full border rounded px-3 py-2">
-        </label>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <label class="flex items-center space-x-2">
-                <input type="checkbox" name="show_weak_subjects" checked class="h-4 w-4">
-                <span class="text-sm">Показывать слабые предметы</span>
-            </label>
-            <label class="block">
-                <span class="text-sm text-gray-600">Порог слабых</span>
-                <input type="number" name="weak_threshold" step="0.1" value="2.5" class="mt-1 w-full border rounded px-3 py-2">
-            </label>
-            <label class="block">
-                <span class="text-sm text-gray-600">Сортировка предметов</span>
-                <select name="subject_sort" class="mt-1 w-full border rounded px-3 py-2">
-                    <option value="alpha">По алфавиту</option>
-                    <option value="avg_desc">По среднему баллу (убывание)</option>
-                </select>
-            </label>
+    </section>
+
+    <section class="grid gap-6 lg:grid-cols-[2fr,1fr]">
+        <div class="rounded-3xl bg-white p-8 shadow-xl shadow-slate-200 ring-1 ring-slate-200/60">
+            <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h2 class="text-2xl font-semibold text-slate-900">Отчёт «Текущая успеваемость»</h2>
+                    <p class="text-sm text-slate-500">Мы автоматически проанализируем оценки и выделим ключевые зоны роста.</p>
+                </div>
+                <div class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-600">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                    Готово к работе
+                </div>
+            </div>
+            <form id="uploadForm" class="mt-8 space-y-6" enctype="multipart/form-data">
+                <div class="grid gap-4 md:grid-cols-2">
+                    <label class="block text-sm text-slate-600">
+                        <span class="font-medium text-slate-700">Период с</span>
+                        <input type="date" name="date_from" required class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring">
+                    </label>
+                    <label class="block text-sm text-slate-600">
+                        <span class="font-medium text-slate-700">по</span>
+                        <input type="date" name="date_to" required class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring">
+                    </label>
+                </div>
+                <label class="block text-sm text-slate-600">
+                    <span class="font-medium text-slate-700">Файл XLSX</span>
+                    <div class="mt-2 flex items-center gap-4 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-indigo-300 hover:bg-indigo-50">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">⬆</div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-slate-700">Перетащите файл сюда или выберите на устройстве</p>
+                            <p class="text-xs text-slate-500">Поддерживается только формат .xlsx размером до 10 МБ</p>
+                        </div>
+                        <input type="file" name="file" accept=".xlsx" required class="hidden">
+                        <button type="button" id="chooseFile" class="rounded-full bg-white px-4 py-2 text-xs font-semibold text-indigo-600 shadow-sm ring-1 ring-indigo-200 transition hover:bg-indigo-50">Выбрать файл</button>
+                    </div>
+                </label>
+                <div class="grid gap-4 md:grid-cols-3">
+                    <label class="block text-sm text-slate-600">
+                        <span class="font-medium text-slate-700">Показывать слабые предметы</span>
+                        <label class="mt-3 flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2">
+                            <input type="checkbox" name="show_weak_subjects" checked class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-sm text-slate-600">Активно</span>
+                        </label>
+                    </label>
+                    <label class="block text-sm text-slate-600">
+                        <span class="font-medium text-slate-700">Порог слабых</span>
+                        <input type="number" name="weak_threshold" step="0.1" value="2.5" class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring">
+                    </label>
+                    <label class="block text-sm text-slate-600">
+                        <span class="font-medium text-slate-700">Сортировка предметов</span>
+                        <select name="subject_sort" class="mt-2 w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-indigo-400 focus:outline-none focus:ring">
+                            <option value="alpha">По алфавиту</option>
+                            <option value="avg_desc">По среднему баллу (убывание)</option>
+                        </select>
+                    </label>
+                </div>
+                <label class="flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                    <input type="checkbox" name="show_guides" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                    <span class="font-medium text-slate-700">Показывать направляющие для резки этикеток</span>
+                </label>
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div id="uploadStatus" class="text-sm text-slate-500"></div>
+                    <button type="submit" id="submitUpload" class="inline-flex items-center justify-center gap-2 rounded-full bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                        <span class="inline-flex h-2 w-2 animate-ping rounded-full bg-white"></span>
+                        Загрузить и построить предпросмотр
+                    </button>
+                </div>
+            </form>
         </div>
-        <label class="flex items-center space-x-2">
-            <input type="checkbox" name="show_guides" class="h-4 w-4">
-            <span class="text-sm">Показывать направляющие</span>
-        </label>
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Загрузить и построить предпросмотр</button>
-    </form>
-    <div id="uploadStatus" class="mt-4 text-sm text-gray-700"></div>
+        <aside class="flex flex-col gap-6">
+            <div class="rounded-3xl bg-white p-6 shadow-xl shadow-slate-200 ring-1 ring-slate-200/60">
+                <h3 class="text-lg font-semibold text-slate-900">Советы по формированию отчёта</h3>
+                <ul class="mt-4 space-y-3 text-sm text-slate-600">
+                    <li class="flex items-start gap-3">
+                        <span class="mt-1 h-2 w-2 rounded-full bg-indigo-500"></span>
+                        Убедитесь, что в выгрузке присутствуют столбцы с предметами и оценками за выбранный период.
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="mt-1 h-2 w-2 rounded-full bg-emerald-500"></span>
+                        Проверьте, что даты периода совпадают с фактическими датами контрольных точек обучения.
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="mt-1 h-2 w-2 rounded-full bg-amber-500"></span>
+                        Используйте порог слабых предметов, чтобы оперативно выявить учащихся, требующих поддержки.
+                    </li>
+                </ul>
+            </div>
+            <div class="rounded-3xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-sky-500 p-6 text-white shadow-xl shadow-indigo-200">
+                <h3 class="text-lg font-semibold">Зачем это нужно?</h3>
+                <p class="mt-2 text-sm text-indigo-50">Этикетки упрощают коммуникацию с родителями и помогают классным руководителям держать в фокусе академические цели. Вы можете распечатать их или отправить в электронном виде.</p>
+                <div class="mt-4 flex items-center gap-3 text-xs uppercase tracking-wide text-indigo-100">
+                    <span class="inline-flex h-2 w-2 rounded-full bg-emerald-300"></span>
+                    Интерактивный предпросмотр обновляется мгновенно
+                </div>
+            </div>
+        </aside>
+    </section>
 </div>
 <script>
     const uploadForm = document.getElementById('uploadForm');
     const statusEl = document.getElementById('uploadStatus');
+    const submitBtn = document.getElementById('submitUpload');
+    const fileInput = uploadForm.querySelector('input[type="file"]');
+    const chooseFileBtn = document.getElementById('chooseFile');
+
+    chooseFileBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) {
+            statusEl.textContent = `Выбран файл: ${fileInput.files[0].name}`;
+        }
+    });
+
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        statusEl.textContent = 'Парсим файл...';
+        statusEl.innerHTML = '<span class="inline-flex items-center gap-2 text-indigo-600"><span class="h-2 w-2 animate-ping rounded-full bg-indigo-500"></span>Парсим файл...</span>';
+        submitBtn.disabled = true;
+        submitBtn.classList.add('opacity-70');
         const formData = new FormData(uploadForm);
-        const response = await fetch('/reports/current/upload', {
-            method: 'POST',
-            body: formData,
-            headers: { 'Accept': 'application/json' }
-        });
-        if (response.ok) {
-            const data = await response.json();
-            const session = data.session_token;
-            window.location.href = `/reports/current/preview/ui?session=${session}`;
-        } else {
-            const data = await response.json();
-            statusEl.textContent = data.detail || 'Не удалось обработать файл';
+        try {
+            const response = await fetch('/reports/current/upload', {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                const session = data.session_token;
+                statusEl.innerHTML = '<span class="inline-flex items-center gap-2 text-emerald-600"><span class="h-2 w-2 rounded-full bg-emerald-500"></span>Файл успешно обработан. Открываем предпросмотр…</span>';
+                setTimeout(() => {
+                    window.location.href = `/reports/current/preview/ui?session=${session}`;
+                }, 400);
+            } else {
+                const data = await response.json();
+                statusEl.innerHTML = `<span class="text-rose-600">${data.detail || 'Не удалось обработать файл'}</span>`;
+            }
+        } catch (error) {
+            statusEl.innerHTML = '<span class="text-rose-600">Произошла ошибка соединения. Попробуйте снова.</span>';
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-70');
         }
     });
 </script>
