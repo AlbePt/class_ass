@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %} — Текущая успеваемость{% endblock %}
+{% block content %}
+<div class="bg-white rounded-lg shadow p-6">
+    <h1 class="text-xl font-semibold mb-4">Отчёт «Текущая успеваемость»</h1>
+    <form id="uploadForm" class="space-y-4" enctype="multipart/form-data">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="block">
+                <span class="text-sm text-gray-600">Период с</span>
+                <input type="date" name="date_from" required class="mt-1 w-full border rounded px-3 py-2">
+            </label>
+            <label class="block">
+                <span class="text-sm text-gray-600">по</span>
+                <input type="date" name="date_to" required class="mt-1 w-full border rounded px-3 py-2">
+            </label>
+        </div>
+        <label class="block">
+            <span class="text-sm text-gray-600">Файл XLSX</span>
+            <input type="file" name="file" accept=".xlsx" required class="mt-1 w-full border rounded px-3 py-2">
+        </label>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <label class="flex items-center space-x-2">
+                <input type="checkbox" name="show_weak_subjects" checked class="h-4 w-4">
+                <span class="text-sm">Показывать слабые предметы</span>
+            </label>
+            <label class="block">
+                <span class="text-sm text-gray-600">Порог слабых</span>
+                <input type="number" name="weak_threshold" step="0.1" value="2.5" class="mt-1 w-full border rounded px-3 py-2">
+            </label>
+            <label class="block">
+                <span class="text-sm text-gray-600">Сортировка предметов</span>
+                <select name="subject_sort" class="mt-1 w-full border rounded px-3 py-2">
+                    <option value="alpha">По алфавиту</option>
+                    <option value="avg_desc">По среднему баллу (убывание)</option>
+                </select>
+            </label>
+        </div>
+        <label class="flex items-center space-x-2">
+            <input type="checkbox" name="show_guides" class="h-4 w-4">
+            <span class="text-sm">Показывать направляющие</span>
+        </label>
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Загрузить и построить предпросмотр</button>
+    </form>
+    <div id="uploadStatus" class="mt-4 text-sm text-gray-700"></div>
+</div>
+<script>
+    const uploadForm = document.getElementById('uploadForm');
+    const statusEl = document.getElementById('uploadStatus');
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        statusEl.textContent = 'Парсим файл...';
+        const formData = new FormData(uploadForm);
+        const response = await fetch('/reports/current/upload', {
+            method: 'POST',
+            body: formData,
+            headers: { 'Accept': 'application/json' }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            const session = data.session_token;
+            window.location.href = `/reports/current/preview/ui?session=${session}`;
+        } else {
+            const data = await response.json();
+            statusEl.textContent = data.detail || 'Не удалось обработать файл';
+        }
+    });
+</script>
+{% endblock %}

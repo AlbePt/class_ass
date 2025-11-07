@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Этикетки успеваемости</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            margin: 0;
+        }
+        .page {
+            width: 210mm;
+            height: 297mm;
+            display: grid;
+            grid-template-columns: repeat(2, 105mm);
+            grid-template-rows: repeat(2, 145mm);
+            gap: 0;
+            padding: 3.5mm 0;
+            box-sizing: border-box;
+        }
+        .label {
+            border: 0.25pt solid rgba(0,0,0,0.15);
+            padding: 5mm;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            font-size: 9pt;
+            line-height: 1.25;
+        }
+        .label h2 {
+            margin: 0 0 2mm 0;
+            font-size: 13pt;
+            line-height: 1.2;
+        }
+        .meta {
+            font-size: 9pt;
+            margin-bottom: 3mm;
+        }
+        .subjects {
+            flex: 1;
+            overflow: hidden;
+        }
+        .subject {
+            margin-bottom: 1mm;
+        }
+        .weak {
+            color: #b91c1c;
+            font-weight: 600;
+        }
+        .signatures {
+            font-size: 9pt;
+            margin-top: 3mm;
+        }
+        .guides .label {
+            border-color: rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+<div class="page{% if options.show_guides %} guides{% endif %}">
+    {% for label in labels %}
+    <div class="label">
+        <h2>{{ label.fio }}</h2>
+        <div class="meta">
+            {% if label.klass %}<div>Класс: {{ label.klass }}</div>{% endif %}
+            {% if label.period_from and label.period_to %}
+                <div>Период: {{ label.period_from.strftime('%d.%m.%Y') }} — {{ label.period_to.strftime('%d.%m.%Y') }}</div>
+            {% endif %}
+        </div>
+        <div class="subjects">
+            {% set overflow = 0 %}
+            {% for subject in label.subjects %}
+                {% if loop.index0 < 8 %}
+                    <div class="subject{% if subject.is_weak %} weak{% endif %}">
+                        <strong>{{ subject.name }}</strong>: {{ subject.grades|join(', ') if subject.grades else '—' }} (ср. {{ '%.1f'|format(subject.average) if subject.average is not none else '—' }})
+                    </div>
+                {% else %}
+                    {% set overflow = overflow + 1 %}
+                {% endif %}
+            {% endfor %}
+            {% if overflow > 0 %}
+                <div class="subject">+ ещё {{ overflow }} предметов</div>
+            {% endif %}
+        </div>
+        {% if options.show_weak_subjects and label.weak_subjects %}
+        <div class="weak">Слабые предметы: {{ label.weak_subjects|join(', ') }}</div>
+        {% endif %}
+        <div class="signatures">
+            <div>Подпись кл. руководителя __________</div>
+            <div>Подпись родителя __________</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+</body>
+</html>
