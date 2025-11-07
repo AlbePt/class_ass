@@ -1,0 +1,70 @@
+{
+  "app": {
+    "title": "Class Assistant",
+    "logout": "Log out",
+    "searchPlaceholder": "Search student...",
+    "session": "Session clears in {{time}}"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Use your work email",
+    "email": "Email",
+    "password": "Password",
+    "showPassword": "Show password",
+    "submit": "Sign in",
+    "errors": {
+      "required": "Required field",
+      "email": "Invalid email"
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome, {{email}}",
+    "quickActions": "Quick actions",
+    "upload": "Upload XLSX",
+    "students": "Go to students"
+  },
+  "upload": {
+    "title": "Upload student list",
+    "dropzone": "Drop XLSX file or click to select",
+    "selectFile": "Select file",
+    "preview": "Preview",
+    "clear": "Clear session",
+    "goStudents": "Go to students",
+    "errors": "Errors",
+    "warnings": "Warnings"
+  },
+  "students": {
+    "title": "Students",
+    "empty": "No students available. Upload data on the Upload page.",
+    "search": "Search by name",
+    "export": "Export CSV"
+  },
+  "reports": {
+    "title": "Reports",
+    "current": "Current performance",
+    "risks": "Academic risks",
+    "exportPdf": "PDF",
+    "exportXlsx": "XLSX"
+  },
+  "labels": {
+    "title": "Labels",
+    "downloadPdf": "Download PDF",
+    "preview": "Preview"
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "language": "Language",
+    "dateFormat": "Date format",
+    "session": "Session",
+    "expires": "Auto clear in"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "upload": "Upload",
+    "students": "Students",
+    "reports": "Reports",
+    "labels": "Labels",
+    "settings": "Settings"
+  }
+}
