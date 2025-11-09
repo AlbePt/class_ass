@@ -1,18 +1,8 @@
-import { createFetch } from '@tanstack/react-query'
-
 const baseURL = import.meta.env.VITE_API_BASE_URL as string
 
 if (!baseURL) {
   console.warn('VITE_API_BASE_URL is not defined')
 }
-
-export const apiClient = createFetch({
-  baseUrl: baseURL ?? '',
-  defaultInit: () => ({
-    credentials: 'include'
-  }),
-  throwOnError: true
-})
 
 export async function request<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
   const response = await fetch(baseURL ? `${baseURL}${input}` : String(input), {
