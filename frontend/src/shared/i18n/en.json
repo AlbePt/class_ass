@@ -12,9 +12,38 @@
     "password": "Password",
     "showPassword": "Show password",
     "submit": "Sign in",
+    "switch": {
+      "toRegister": {
+        "label": "Don't have an account?",
+        "action": "Create one"
+      },
+      "toLogin": {
+        "label": "Already registered?",
+        "action": "Sign in"
+      }
+    },
     "errors": {
       "required": "Required field",
-      "email": "Invalid email"
+      "email": "Invalid email",
+      "passwordMin": "Password must be at least 6 characters long",
+      "incorrectCredentials": "Incorrect email or password",
+      "generic": "Could not sign in. Check your credentials and try again."
+    }
+  },
+  "register": {
+    "title": "Create account",
+    "subtitle": "Register to get started",
+    "email": "Email",
+    "password": "Password",
+    "showPassword": "Show password",
+    "submit": "Create account",
+    "success": "Account created. You can sign in now.",
+    "errors": {
+      "required": "Required field",
+      "email": "Invalid email",
+      "passwordMin": "Password must be at least 6 characters long",
+      "userExists": "A user with this email already exists",
+      "generic": "Could not create account. Please try again."
     }
   },
   "dashboard": {
