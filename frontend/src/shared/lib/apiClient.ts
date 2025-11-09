@@ -1,11 +1,17 @@
-const baseURL = import.meta.env.VITE_API_BASE_URL as string
+const envBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim()
+const baseURL = (envBaseUrl && envBaseUrl.length > 0 ? envBaseUrl : 'http://localhost:8000').replace(/\/$/, '')
 
-if (!baseURL) {
-  console.warn('VITE_API_BASE_URL is not defined')
+if (!envBaseUrl) {
+  console.warn(`VITE_API_BASE_URL is not defined. Falling back to ${baseURL}`)
 }
 
 export async function request<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
-  const response = await fetch(baseURL ? `${baseURL}${input}` : String(input), {
+  const resolvedInput =
+    typeof input === 'string' && !input.startsWith('http')
+      ? `${baseURL}${input.startsWith('/') ? input : `/${input}`}`
+      : input
+
+  const response = await fetch(resolvedInput, {
     credentials: 'include',
     ...init,
     headers: {
