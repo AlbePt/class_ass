@@ -4,12 +4,13 @@ from datetime import timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel, EmailStr
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, EmailStr, ValidationError
 
 from backend.core.security import (
     clear_login_cookie,
     create_access_token,
+    get_current_user,
     get_password_hash,
     set_login_cookie,
     verify_password,
@@ -17,6 +18,11 @@ from backend.core.security import (
 from backend.core.services.user_service import User, authenticate_user, create_user, get_user_by_email
 
 router = APIRouter()
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
 
 
 class RegisterRequest(BaseModel):
@@ -44,12 +50,27 @@ class LoginResponse(BaseModel):
     token_type: str = "bearer"
 
 
+async def _parse_login_payload(request: Request) -> LoginRequest:
+    content_type = request.headers.get("content-type", "")
+    if "application/json" in content_type:
+        try:
+            payload = LoginRequest.model_validate(await request.json())
+        except ValidationError as exc:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid payload") from exc
+        return payload
+
+    form = await request.form()
+    username = form.get("username") or form.get("email")
+    password = form.get("password")
+    if not username or not password:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Missing credentials")
+    return LoginRequest(email=username, password=password)
+
+
 @router.post("/login", response_model=LoginResponse)
-async def login(
-    response: Response,
-    form_data: OAuth2PasswordRequestForm = Depends(),
-) -> LoginResponse:
-    user = authenticate_user(form_data.username, form_data.password, verify_password)
+async def login(response: Response, request: Request) -> LoginResponse:
+    payload = await _parse_login_payload(request)
+    user = authenticate_user(payload.email, payload.password, verify_password)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect credentials")
     token = create_access_token({"sub": user.email})
@@ -57,7 +78,17 @@ async def login(
     return LoginResponse(access_token=token)
 
 
-@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-async def logout(response: Response) -> Response:
+@router.post("/logout")
+async def logout() -> JSONResponse:
+    response = JSONResponse({"ok": True})
     clear_login_cookie(response)
     return response
+
+
+class MeResponse(BaseModel):
+    email: EmailStr
+
+
+@router.get("/me", response_model=MeResponse)
+async def read_me(user: User = Depends(get_current_user)) -> MeResponse:
+    return MeResponse(email=user.email)
