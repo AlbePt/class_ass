@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactNode, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -15,7 +15,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
             retry: false
           }
         },
-        queryCache: {
+        queryCache: new QueryCache({
           onError: (error) => {
             if (error instanceof Error && error.message.includes('401')) {
               window.location.href = '/login'
@@ -23,7 +23,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
               toast.error('Что-то пошло не так')
             }
           }
-        }
+        })
       })
   )
 
